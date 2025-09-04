@@ -385,6 +385,26 @@ class TranscriptCreator:#main class used for writing to pdf with using FPDF
 
         myPdf.output(filePath)
 
+def pass_fail_func(student:"Student") -> str:
+    passed=0
+    failed=0
+    for semester in student.transcript:
+        for course in semester.courses:
+            if course.grade in GRADES:
+                if GRADES[course.grade]>=1:
+                    passed+=1
+                else:
+                    failed+=1
+    pass_fail=(
+        f"Student Name: {student.name}\n"
+        f"Student ID: {student.id}\n"
+        f"Passed: {passed}\n"
+        f"Failed: {failed}\n"
+    )
+    return pass_fail
+
+
+
 if __name__=="__main__":# main function to execute all process directly
     data = DataLoad()
     data.departments["CNG"]=Department(1,"CNG","Computer Engineering")
@@ -399,6 +419,12 @@ if __name__=="__main__":# main function to execute all process directly
         exit(1)
 
     takenStudent = data.get_student_by_id(student_id_input)
+    if not takenStudent:
+        print(f"No student found with ID {student_id_input}.")
+        exit(1)
+
+    print(pass_fail_func(takenStudent))
+
     if takenStudent:
         transcript_creator=TranscriptCreate(takenStudent)
         deskPath=os.path.join(os.path.expanduser("~"),"Desktop","transcript")
