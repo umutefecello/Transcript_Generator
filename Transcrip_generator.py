@@ -5,6 +5,7 @@ import os
 from fpdf import FPDF
 
 
+
 GRADES={"AA":4.0,"BA":3.5,"BB":3.0,"CB":2.5,"CC":2.0,"DC":1.5,"DD":1.0,"FD":0.5,"FF":0.0}
 #dictionary for letter grades
 EX_GRADE={"EX"}
@@ -385,6 +386,27 @@ class TranscriptCreator:#main class used for writing to pdf with using FPDF
 
         myPdf.output(filePath)
 
+def create_summary(student:"Student") -> str:
+    credit_total=0
+    point_total=0
+    for semester in student.transcript:
+        for course in semester.courses:
+            if course.grade in GRADES:
+                point_total+=GRADES[course.grade]*course.credi
+                credit_total+=course.credi
+
+    gpa = point_total/credit_total if credit_total else 0
+    summary = (
+        f"Student ID: {student.id}\n"
+        f"Name: {student.name}\n"
+        f"GPA: {gpa:.2f}\n"
+        f"Total Credit: {credit_total}\n"
+    )
+    return summary
+
+
+
+
 if __name__=="__main__":# main function to execute all process directly
     data = DataLoad()
     data.departments["CNG"]=Department(1,"CNG","Computer Engineering")
@@ -397,6 +419,13 @@ if __name__=="__main__":# main function to execute all process directly
     except ValueError:
         print("Invalid student ID.")
         exit(1)
+
+    curr_student=data.get_student_by_id(student_id_input)
+    if not curr_student:
+        print("Student not found.")
+        exit(1)
+    print(f"\n ---- Transcript Summary for Student ID {student_id_input} ----")
+    print(create_summary(curr_student))
 
     takenStudent = data.get_student_by_id(student_id_input)
     if takenStudent:
